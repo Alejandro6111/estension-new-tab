@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es" class="is-booting">
+<head>
+<meta charset="UTF-8">
+<title>Nueva pestaña</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Fondo -->
+  <div id="bg-layer">
+    <div id="bg-gradient" class="bg-fill"></div>
+    <img id="bg-image" class="bg-fill" alt="" hidden>
+    <video id="bg-video" class="bg-fill" autoplay muted loop playsinline hidden></video>
+    <div class="bg-vignette"></div>
+    <div id="bg-dim" class="bg-fill"></div>
+  </div>
+  <div id="boot-preview" aria-hidden="true"></div>
+  <script src="boot.js"></script>
+
+  <button class="video-mute-btn" id="video-mute-btn" hidden title="Silenciar o activar el sonido del video">🔇</button>
+
+  <div class="widget-columns">
+  <!-- Columna izquierda: widgets -->
+  <aside class="widgets" aria-label="Herramientas personales">
+    <div class="card clock-card">
+      <div class="clock-greeting" id="clock-greeting" hidden></div>
+      <div class="clock-time" id="clock-time">--:--</div>
+      <div class="clock-date" id="clock-date">—</div>
+    </div>
+
+    <div class="card weather-card" id="weather-card">
+      <div class="weather-loading" id="weather-loading">Activa la ubicación para ver el clima</div>
+      <div class="weather-body" id="weather-body" hidden>
+        <div class="weather-icon" id="weather-icon">☀️</div>
+        <div class="weather-info">
+          <div class="weather-place" id="weather-place">—</div>
+          <div class="weather-desc" id="weather-desc">—</div>
+          <div class="weather-extra" id="weather-extra">—</div>
+        </div>
+        <div class="weather-temp" id="weather-temp">—°</div>
+      </div>
+      <button class="weather-retry" id="weather-retry" hidden>Reintentar</button>
+    </div>
+
+    <div class="card quote-card">
+      <p class="quote-text" id="quote-text">—</p>
+      <p class="quote-author" id="quote-author">—</p>
+    </div>
+
+    <div class="card todo-card">
+      <div class="todo-heading"><div class="todo-title">Pendientes</div><span id="todo-count" class="todo-count"></span></div>
+      <ul class="todo-list" id="todo-list"></ul>
+      <form class="todo-form" id="todo-form">
+        <input id="todo-input" type="text" maxlength="120" placeholder="Escribe una tarea" aria-label="Nueva tarea">
+        <button class="todo-add" type="submit" aria-label="Añadir tarea">+</button>
+      </form>
+      <button class="todo-clear" id="todo-clear" type="button" hidden>Limpiar completadas</button>
+    </div>
+
+    <section class="card focus-card extra-widget" aria-labelledby="focus-title">
+      <div class="widget-heading"><h2 id="focus-title">Un rato de enfoque</h2><span class="widget-meta" id="focus-sessions">0 hoy</span></div>
+      <div class="focus-presets" role="group" aria-label="Duración del temporizador">
+        <button type="button" data-focus-minutes="25">25 min</button>
+        <button type="button" data-focus-minutes="50">50 min</button>
+        <button type="button" data-focus-minutes="5">Pausa · 5</button>
+      </div>
+      <div class="focus-readout"><span id="focus-time" role="timer" aria-live="off">25:00</span><span id="focus-kind">Enfoque</span></div>
+      <div class="focus-actions">
+        <button type="button" id="focus-toggle" class="widget-primary">Comenzar</button>
+        <button type="button" id="focus-reset" class="widget-secondary" aria-label="Reiniciar temporizador" title="Reiniciar temporizador"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/></svg></button>
+      </div>
+      <p class="widget-hint" id="focus-status" role="status">Una cosa a la vez.</p>
+    </section>
+
+    <section class="card notes-card extra-widget" aria-labelledby="notes-title">
+      <div class="widget-heading"><h2 id="notes-title">Notas al vuelo</h2><span class="widget-meta" id="notes-status" role="status">Solo aquí</span></div>
+      <textarea id="quick-note" maxlength="4000" rows="4" placeholder="Esa idea que no quieres perder…" aria-label="Notas rápidas" spellcheck="true"></textarea>
+      <div class="notes-footer"><span class="widget-hint">Se guardan en este navegador.</span><span class="widget-meta" id="notes-count">0 / 4000</span></div>
+    </section>
+  </aside>
+
+  <!-- Columna derecha: calendarios independientes -->
+  <aside class="widgets widgets-right" aria-label="Calendarios y hábitos">
+    <section class="card calendar-card" aria-labelledby="google-calendar-title">
+      <div class="calendar-heading"><h2 id="google-calendar-title">Mi calendario</h2><button type="button" class="calendar-action" id="google-calendar-settings">Conectar</button></div>
+      <div id="google-calendar-content" class="calendar-content" aria-live="polite"></div>
+    </section>
+
+    <section class="card calendar-card sports-card" aria-labelledby="sports-calendar-title">
+      <div class="calendar-heading"><h2 id="sports-calendar-title">Partidos</h2><button type="button" class="calendar-action" id="sports-refresh" aria-label="Actualizar partidos">Actualizar</button></div>
+      <div class="sports-tabs" role="group" aria-label="Equipo">
+        <button type="button" data-team="barcelona">Barça</button>
+        <button type="button" data-team="millonarios">Millos</button>
+        <button type="button" data-team="colombia">Colombia</button>
+      </div>
+      <div id="sports-calendar-content" class="calendar-content" aria-live="polite"></div>
+      <button type="button" class="calendar-source" id="sports-source">Ver calendario completo ↗</button>
+    </section>
+
+    <section class="card habits-card extra-widget" aria-labelledby="habits-title">
+      <div class="widget-heading"><h2 id="habits-title">Pequeñas victorias</h2><span class="widget-meta" id="habits-count">0 / 3</span></div>
+      <p class="widget-hint habits-intro" id="habits-status">Un poquito, cada día.</p>
+      <ul class="habits-list" id="habits-list"></ul>
+      <form class="todo-form" id="habit-form">
+        <input id="habit-input" type="text" maxlength="60" placeholder="Un nuevo hábito" aria-label="Nuevo hábito">
+        <button class="todo-add" type="submit" aria-label="Añadir hábito">+</button>
+      </form>
+      <p class="widget-hint" id="habit-message" role="status" hidden></p>
+    </section>
+
+    <section class="card time-card extra-widget" aria-labelledby="time-title">
+      <div class="widget-heading"><h2 id="time-title">El tiempo en perspectiva</h2></div>
+      <div class="time-progress-heading"><label for="day-progress">Hoy</label><span id="day-percent"></span></div>
+      <progress id="day-progress" max="100" value="0"></progress>
+      <div class="time-progress-heading"><label for="year-progress" id="year-label">Este año</label><span id="year-percent"></span></div>
+      <progress id="year-progress" max="100" value="0"></progress>
+      <p class="widget-hint" id="time-remaining"></p>
+    </section>
+  </aside>
+  </div>
+
+  <!-- Centro: búsqueda + categorías + accesos -->
+  <main class="main-area">
+    <form class="search-bar" id="search-form">
+      <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.47 6.47 0 0 0 1.48-5.34C15.44 5.01 12.55 2.5 9.14 2.5 5.6 2.5 2.75 5.35 2.75 8.9s2.85 6.4 6.39 6.4c1.49 0 2.86-.53 3.93-1.4l.27.28v.79l4.99 4.98 1.49-1.49-4.98-4.98ZM9.14 13.3c-2.43 0-4.4-1.97-4.4-4.4s1.97-4.4 4.4-4.4 4.4 1.97 4.4 4.4-1.97 4.4-4.4 4.4Z"/></svg>
+      <input type="text" id="search-input" placeholder="Buscar en Google o escribe una URL" autocomplete="off">
+      <button type="button" class="icon-btn" id="settings-btn" title="Ajustes" aria-label="Abrir ajustes">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19.14 12.94a7.14 7.14 0 0 0 .06-.94 7.14 7.14 0 0 0-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.3 7.3 0 0 0-1.63-.94L14.4 2.4a.5.5 0 0 0-.5-.4h-3.84a.5.5 0 0 0-.5.4l-.36 2.86a7.3 7.3 0 0 0-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64L4.8 11.06c-.04.31-.06.62-.06.94s.02.63.06.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.3.6.22l2.39-.96c.5.4 1.04.71 1.63.94l.36 2.86c.03.24.25.42.5.42h3.84c.25 0 .47-.18.5-.42l.36-2.86c.59-.23 1.13-.55 1.63-.94l2.39.96c.22.08.48 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg>
+      </button>
+    </form>
+
+    <nav class="category-tabs" id="category-tabs" aria-label="Categorías de accesos"></nav>
+
+    <div class="shortcuts-grid" id="shortcuts-grid"></div>
+  </main>
+
+  <!-- Barra lateral derecha -->
+  <aside class="side-dock">
+    <button class="dock-btn" data-chrome="chrome://bookmarks" title="Marcadores">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M17 3H7a2 2 0 0 0-2 2v16l7-3 7 3V5a2 2 0 0 0-2-2Z"/></svg>
+    </button>
+    <button class="dock-btn" data-chrome="chrome://history" title="Historial">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 1 1 2.05 4.95l-1.42 1.42A9 9 0 1 0 13 3Zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8Z"/></svg>
+    </button>
+    <button class="dock-btn" data-chrome="chrome://downloads" title="Descargas">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M5 20h14v-2H5v2ZM19 9h-4V3H9v6H5l7 7 7-7Z"/></svg>
+    </button>
+    <button class="dock-btn" data-chrome="chrome://extensions" title="Extensiones">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5a2.5 2.5 0 0 0-5 0V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5a2.7 2.7 0 0 1 0 5.4H2V20c0 1.1.9 2 2 2h3.8v-1.5a2.7 2.7 0 0 1 5.4 0V22H17c1.1 0 2-.9 2-2v-4h1.5a2.5 2.5 0 0 0 0-5Z"/></svg>
+    </button>
+    <button class="dock-btn" id="dock-settings-btn" title="Ajustes">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19.14 12.94a7.14 7.14 0 0 0 .06-.94 7.14 7.14 0 0 0-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.3 7.3 0 0 0-1.63-.94L14.4 2.4a.5.5 0 0 0-.5-.4h-3.84a.5.5 0 0 0-.5.4l-.36 2.86a7.3 7.3 0 0 0-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64L4.8 11.06c-.04.31-.06.62-.06.94s.02.63.06.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.3.6.22l2.39-.96c.5.4 1.04.71 1.63.94l.36 2.86c.03.24.25.42.5.42h3.84c.25 0 .47-.18.5-.42l.36-2.86c.59-.23 1.13-.55 1.63-.94l2.39.96c.22.08.48 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg>
+    </button>
+  </aside>
+
+  <!-- Modal: añadir acceso directo -->
+  <div class="modal-overlay" id="shortcut-modal" hidden>
+    <div class="modal">
+      <h2>Nuevo acceso directo</h2>
+      <label>Nombre
+        <input type="text" id="shortcut-name" placeholder="Ej. Gmail">
+      </label>
+      <label>Enlace
+        <input type="text" id="shortcut-url" placeholder="Ej. gmail.com">
+      </label>
+      <label>Categoría
+        <select id="shortcut-category"></select>
+      </label>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="shortcut-cancel">Cancelar</button>
+        <button class="btn-solid" id="shortcut-save">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: nueva categoría -->
+  <div class="modal-overlay" id="category-modal" hidden>
+    <div class="modal">
+      <h2>Nueva categoría</h2>
+      <label>Nombre
+        <input type="text" id="category-name" placeholder="Ej. Trabajo">
+      </label>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="category-cancel">Cancelar</button>
+        <button class="btn-solid" id="category-save">Crear</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="rename-category-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="rename-category-title">
+      <h2 id="rename-category-title">Cambiar nombre de categoría</h2>
+      <label>Nuevo nombre
+        <input type="text" id="rename-category-name" maxlength="60">
+      </label>
+      <p class="data-status" id="rename-category-status" role="status"></p>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="rename-category-cancel" type="button">Cancelar</button>
+        <button class="btn-solid" id="rename-category-save" type="button">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="aurora-context-menu" class="context-menu" role="menu" hidden></div>
+
+  <!-- Modal: mover acceso -->
+  <div class="modal-overlay" id="move-shortcut-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="move-shortcut-title">
+      <h2 id="move-shortcut-title">Mover acceso</h2>
+      <label>Categoría de destino
+        <select id="move-shortcut-category"></select>
+      </label>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="move-shortcut-cancel" type="button">Cancelar</button>
+        <button class="btn-solid" id="move-shortcut-save" type="button">Mover</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="media-viewer-modal" hidden>
+    <div class="modal media-viewer" role="dialog" aria-modal="true" aria-labelledby="media-viewer-name">
+      <div class="media-viewer-header">
+        <div><h2 id="media-viewer-name"></h2><p id="media-viewer-index"></p></div>
+        <button type="button" class="icon-btn" id="media-viewer-close" aria-label="Cerrar vista previa">✕</button>
+      </div>
+      <div class="media-viewer-stage" id="media-viewer-stage"></div>
+      <div class="media-viewer-footer">
+        <div>
+          <button type="button" class="btn-ghost" id="media-viewer-prev">Anterior</button>
+          <button type="button" class="btn-ghost" id="media-viewer-next">Siguiente</button>
+        </div>
+        <button type="button" class="btn-solid" id="media-viewer-use">Usar como fondo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel de ajustes -->
+  <div class="modal-overlay" id="settings-modal" hidden>
+    <div class="modal settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="settings-header">
+        <div><h2 id="settings-title">Personaliza Aurora</h2><p>Haz que cada pestaña se sienta tuya.</p></div>
+        <button class="icon-btn" id="settings-modal-close" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="settings-body">
+        <nav class="settings-nav" aria-label="Secciones de ajustes">
+          <button class="settings-nav-btn active" data-section="fondo">Fondo</button>
+          <button class="settings-nav-btn" data-section="apariencia">Apariencia</button>
+          <button class="settings-nav-btn" data-section="vista">Vista</button>
+          <button class="settings-nav-btn" data-section="reloj">Reloj y clima</button>
+          <button class="settings-nav-btn" data-section="calendario">Calendarios</button>
+          <button class="settings-nav-btn" data-section="busqueda">Búsqueda</button>
+          <button class="settings-nav-btn" data-section="datos">Tus datos</button>
+        </nav>
+
+        <div class="settings-content">
+
+          <section class="settings-section" id="section-fondo">
+            <h3>Fondo</h3><p class="settings-intro">Elige lo que aparece detrás de tus accesos.</p>
+            <div class="bg-type-tabs">
+              <button class="bg-type-btn" data-type="gradient">Degradado</button>
+              <button class="bg-type-btn" data-type="image">Imagen</button>
+              <button class="bg-type-btn" data-type="video">Video</button>
+            </div>
+
+            <div class="bg-panel" id="bg-panel-gradient">
+              <p class="settings-hint">Un degradado cálido, sin imágenes ni conexión a internet.</p>
+            </div>
+
+            <div class="bg-panel" id="bg-panel-image" hidden>
+              <label>URL de la imagen
+                <input type="text" id="bg-image-url" placeholder="https://...">
+              </label>
+              <p class="settings-hint">o sube un archivo desde tu equipo</p>
+              <input type="file" id="bg-image-file" accept="image/png,image/jpeg,image/gif,image/webp,image/avif">
+              <div class="media-library" id="image-library"></div>
+            </div>
+
+            <div class="bg-panel" id="bg-panel-video" hidden>
+              <label>URL del video (mp4 o webm)
+                <input type="text" id="bg-video-url" placeholder="https://...">
+              </label>
+              <p class="settings-hint">o sube un archivo desde tu equipo (recomendado &lt; 25&nbsp;MB)</p>
+              <input type="file" id="bg-video-file" accept="video/mp4,video/webm,video/ogg">
+              <div class="media-library" id="video-library"></div>
+              <p class="settings-hint">Ajuste del video a la pantalla</p>
+              <div class="btn-group" id="video-fit-group">
+                <button type="button" data-fit="cover">Cubrir</button>
+                <button type="button" data-fit="contain">Mostrar completo</button>
+                <button type="button" data-fit="fill">Estirar a pantalla</button>
+              </div>
+              <p class="settings-hint">Cubrir llena la pantalla sin deformar; Mostrar completo conserva todo el fotograma; Estirar llena la pantalla aunque cambie la proporción.</p>
+              <label>Color de los espacios libres
+                <input type="color" id="video-fill-color" value="#24170e">
+              </label>
+              <button type="button" class="btn-ghost" id="video-sample-color">Tomar color del video</button>
+              <p class="settings-hint" id="video-color-hint">Se muestra al elegir «Mostrar completo». También puedes elegir el color manualmente.</p>
+              <label class="switch-row"><span>Reproducir con sonido</span><input type="checkbox" id="video-sound-toggle"></label>
+              <label>Volumen
+                <input type="range" id="video-volume" min="0" max="100" value="50">
+              </label>
+            </div>
+
+            <div class="settings-divider"></div>
+            <label>Oscurecer fondo
+              <input type="range" id="dim-range" min="0" max="80" value="40">
+            </label>
+            <label>Desenfoque
+              <input type="range" id="blur-range" min="0" max="15" value="0">
+            </label>
+          </section>
+
+          <section class="settings-section" id="section-apariencia" hidden>
+            <h3>Apariencia</h3><p class="settings-intro">Elige una paleta para toda Aurora y personaliza sus detalles.</p>
+            <p class="settings-hint" id="theme-label">Tema de colores</p>
+            <div class="theme-grid" id="theme-group" role="group" aria-labelledby="theme-label" aria-describedby="theme-hint">
+              <button type="button" class="theme-option active" data-theme="aurora" aria-pressed="true"><span class="theme-swatch" aria-hidden="true"></span><span>Aurora</span></button>
+              <button type="button" class="theme-option" data-theme="blanco" aria-pressed="false"><span class="theme-swatch" aria-hidden="true"></span><span>Blanco</span></button>
+              <button type="button" class="theme-option" data-theme="negro" aria-pressed="false"><span class="theme-swatch" aria-hidden="true"></span><span>Negro</span></button>
+              <button type="button" class="theme-option" data-theme="dorado" aria-pressed="false"><span class="theme-swatch" aria-hidden="true"></span><span>Dorado</span></button>
+              <button type="button" class="theme-option" data-theme="azul" aria-pressed="false"><span class="theme-swatch" aria-hidden="true"></span><span>Azul</span></button>
+              <button type="button" class="theme-option" data-theme="verde" aria-pressed="false"><span class="theme-swatch" aria-hidden="true"></span><span>Verde</span></button>
+              <button type="button" class="theme-option" data-theme="violeta" aria-pressed="false"><span class="theme-swatch" aria-hidden="true"></span><span>Violeta</span></button>
+              <button type="button" class="theme-option" data-theme="rosa" aria-pressed="false"><span class="theme-swatch" aria-hidden="true"></span><span>Rosa</span></button>
+            </div>
+            <p class="settings-hint" id="theme-hint">Se aplica al instante a paneles, textos y botones, y al fondo predeterminado. Conserva tu imagen o video. Cada tema propone un acento que puedes cambiar abajo.</p>
+            <div class="settings-divider"></div>
+            <label>Color de acento
+              <input type="color" id="accent-color" value="#f4a54b">
+            </label>
+            <p class="settings-hint">Estilo de las tarjetas</p>
+            <div class="btn-group" id="card-style-group">
+              <button data-style="glass" class="active">Cristal</button>
+              <button data-style="solid">Sólido</button>
+              <button data-style="minimal">Minimalista</button>
+            </div>
+            <div class="settings-divider"></div>
+            <p class="settings-hint" id="shortcut-style-label">Estilo de las cajas de accesos</p>
+            <div class="shortcut-style-grid" id="shortcut-style-group" role="group" aria-labelledby="shortcut-style-label">
+              <button type="button" class="shortcut-style-option active" data-shortcut-style="glass" aria-pressed="true"><span class="shortcut-style-sample" aria-hidden="true"></span><span>Cristal</span></button>
+              <button type="button" class="shortcut-style-option" data-shortcut-style="round" aria-pressed="false"><span class="shortcut-style-sample" aria-hidden="true"></span><span>Redondas</span></button>
+              <button type="button" class="shortcut-style-option" data-shortcut-style="transparent" aria-pressed="false"><span class="shortcut-style-sample" aria-hidden="true"></span><span>Transparentes</span></button>
+              <button type="button" class="shortcut-style-option" data-shortcut-style="solid" aria-pressed="false"><span class="shortcut-style-sample" aria-hidden="true"></span><span>Con fondo</span></button>
+              <button type="button" class="shortcut-style-option" data-shortcut-style="outline" aria-pressed="false"><span class="shortcut-style-sample" aria-hidden="true"></span><span>Contorno</span></button>
+              <button type="button" class="shortcut-style-option" data-shortcut-style="raised" aria-pressed="false"><span class="shortcut-style-sample" aria-hidden="true"></span><span>3D</span></button>
+              <button type="button" class="shortcut-style-option" data-shortcut-style="soft" aria-pressed="false"><span class="shortcut-style-sample" aria-hidden="true"></span><span>Suaves</span></button>
+              <button type="button" class="shortcut-style-option" data-shortcut-style="neon" aria-pressed="false"><span class="shortcut-style-sample" aria-hidden="true"></span><span>Neón</span></button>
+              <button type="button" class="shortcut-style-option" data-shortcut-style="aurora" aria-pressed="false"><span class="shortcut-style-sample" aria-hidden="true"></span><span>Aurora</span></button>
+              <button type="button" class="shortcut-style-option" data-shortcut-style="paper" aria-pressed="false"><span class="shortcut-style-sample" aria-hidden="true"></span><span>Papel</span></button>
+              <button type="button" class="shortcut-style-option" data-shortcut-style="frame" aria-pressed="false"><span class="shortcut-style-sample" aria-hidden="true"></span><span>Marco</span></button>
+              <button type="button" class="shortcut-style-option" data-shortcut-style="tile" aria-pressed="false"><span class="shortcut-style-sample" aria-hidden="true"></span><span>Baldosa</span></button>
+            </div>
+          </section>
+
+          <section class="settings-section" id="section-vista" hidden>
+            <h3>Vista</h3><p class="settings-intro">Ajusta cómo se muestran los accesos y los widgets.</p>
+            <p class="settings-hint">Presentación de los accesos</p>
+            <div class="btn-group view-option-group" id="shortcut-view-group" role="group" aria-label="Presentación de los accesos">
+              <button type="button" data-view="cuadricula">Cuadrícula</button>
+              <button type="button" data-view="compacta">Compacta</button>
+              <button type="button" data-view="lista">Lista</button>
+              <button type="button" data-view="mosaico">Mosaico</button>
+              <button type="button" data-view="tarjetas">Tarjetas</button>
+              <button type="button" data-view="cinta">Cinta</button>
+            </div>
+            <p class="settings-hint">Mosaico destaca algunos accesos; Tarjetas les da más espacio; Cinta se recorre horizontalmente.</p>
+            <p class="settings-hint">Animación de los accesos</p>
+            <div class="btn-group" id="shortcut-motion-group" role="group" aria-label="Animación de los accesos">
+              <button type="button" data-motion="suave">Suave</button>
+              <button type="button" data-motion="viva">Viva</button>
+              <button type="button" data-motion="ninguna">Ninguna</button>
+            </div>
+            <label class="switch-row"><span>Mostrar nombres de accesos</span><input type="checkbox" id="shortcut-labels" checked></label>
+            <label>Filas por columna en vista de lista
+              <input id="list-rows" type="number" min="3" max="20" step="1" value="8">
+            </label>
+            <p class="settings-hint">Al superar este número, los accesos continúan en otra columna a la derecha.</p>
+            <div class="settings-divider"></div>
+            <p class="settings-hint">Cómo se acomodan los widgets</p>
+            <div class="btn-group" id="layout-group">
+              <button data-layout="lateral" class="active">Lateral</button>
+              <button data-layout="superior">Superior</button>
+              <button data-layout="oculto">Ocultar</button>
+            </div>
+            <div class="settings-divider"></div>
+            <p class="settings-hint">Posición de la barra de herramientas</p>
+            <div class="btn-group dock-position-group" id="dock-position-group">
+              <button type="button" data-position="derecha">Derecha</button>
+              <button type="button" data-position="izquierda">Izquierda</button>
+              <button type="button" data-position="arriba">Arriba</button>
+              <button type="button" data-position="abajo">Abajo</button>
+              <button type="button" data-position="oculta">Oculta</button>
+            </div>
+            <div class="settings-divider"></div>
+            <label class="switch-row"><span>Reloj</span><input type="checkbox" id="show-clock" checked></label>
+            <label class="switch-row"><span>Clima</span><input type="checkbox" id="show-weather" checked></label>
+            <label class="switch-row"><span>Frase del día</span><input type="checkbox" id="show-quote" checked></label>
+            <label class="switch-row"><span>Pendientes</span><input type="checkbox" id="show-todo" checked></label>
+            <label class="switch-row"><span>Temporizador de enfoque</span><input type="checkbox" id="show-focus" checked></label>
+            <label class="switch-row"><span>Notas rápidas</span><input type="checkbox" id="show-notes" checked></label>
+            <label class="switch-row"><span>Hábitos diarios</span><input type="checkbox" id="show-habits" checked></label>
+            <label class="switch-row"><span>Avance del día y del año</span><input type="checkbox" id="show-time-progress" checked></label>
+          </section>
+
+          <section class="settings-section" id="section-reloj" hidden>
+            <h3>Reloj y clima</h3><p class="settings-intro">Elige cómo mostrar la hora y la temperatura.</p>
+            <p class="settings-hint">Formato de hora</p>
+            <div class="btn-group" id="clock-format-group">
+              <button data-format="24" class="active">24 h</button>
+              <button data-format="12">12 h</button>
+            </div>
+            <label class="switch-row"><span>Mostrar segundos</span><input type="checkbox" id="show-seconds"></label>
+            <div class="settings-divider"></div>
+            <p class="settings-hint">Unidad de temperatura</p>
+            <div class="btn-group" id="temp-unit-group">
+              <button data-unit="C" class="active">°C</button>
+              <button data-unit="F">°F</button>
+            </div>
+          </section>
+
+          <section class="settings-section" id="section-calendario" hidden>
+            <h3>Calendarios</h3><p class="settings-intro">Tus eventos y los partidos se muestran por separado en la columna derecha.</p>
+            <label class="switch-row"><span>Mostrar calendarios</span><input type="checkbox" id="show-calendars" checked></label>
+            <div class="settings-divider"></div>
+            <h3>Mi Google Calendar</h3>
+            <p class="settings-hint">Copia en Google Calendar la «Dirección secreta en formato iCal» de tu calendario: Ajustes → elige tu calendario → Integrar calendario. Aurora solo lee sus eventos; no puede modificarlos.</p>
+            <label for="google-ical-url">Dirección secreta iCal
+              <input type="url" id="google-ical-url" placeholder="https://calendar.google.com/calendar/ical/…/basic.ics" autocomplete="off" spellcheck="false">
+            </label>
+            <div class="data-actions calendar-settings-actions">
+              <button type="button" class="btn-solid" id="google-ical-connect">Conectar calendario</button>
+              <button type="button" class="btn-ghost" id="google-ical-disconnect" hidden>Desconectar</button>
+            </div>
+            <p class="settings-hint">La dirección se guarda solo en este navegador, fuera de las copias de Aurora. Quien tenga esa dirección puede leer tu calendario.</p>
+            <p id="google-ical-status" class="data-status" role="status" aria-live="polite"></p>
+            <div class="settings-divider"></div>
+            <h3>Calendarios de fútbol</h3>
+            <p class="settings-hint">FC Barcelona, Millonarios y la Selección Colombia. Sus próximos partidos se actualizan desde Fixtur.es; no se añaden a tu Google Calendar.</p>
+          </section>
+
+          <section class="settings-section" id="section-busqueda" hidden>
+            <h3>Búsqueda</h3><p class="settings-intro">Configura el buscador y tu saludo.</p>
+            <label>Motor de búsqueda
+              <select id="search-engine-select">
+                <option value="google">Google</option>
+                <option value="bing">Bing</option>
+                <option value="duckduckgo">DuckDuckGo</option>
+                <option value="ecosia">Ecosia</option>
+              </select>
+            </label>
+            <label>Saludo personalizado
+              <input type="text" id="greeting-input" placeholder="Ej. Ana (vacío para ocultarlo)">
+            </label>
+          </section>
+
+          <section class="settings-section" id="section-datos" hidden>
+            <h3>Tus datos</h3><p class="settings-intro">Guarda una copia de tus accesos, tareas, notas, hábitos y preferencias.</p>
+            <div class="data-actions">
+              <button class="btn-ghost" id="data-export" type="button">Exportar copia</button>
+              <label class="import-label" for="data-import">Importar copia<input id="data-import" type="file" accept=".json,application/json"></label>
+            </div>
+            <p class="settings-hint">La importación reemplaza el contenido actual. Se acepta un archivo JSON exportado desde Aurora.</p>
+            <p id="data-status" class="data-status" role="status" aria-live="polite"></p>
+            <div class="settings-divider"></div>
+            <h3>Actividad de páginas</h3>
+            <p class="settings-hint">Registra el tiempo de la pestaña activa cuando el navegador está enfocado y el equipo no está inactivo. Solo se guarda en este navegador.</p>
+            <label class="switch-row"><span>Registrar actividad</span><input type="checkbox" id="track-pages"></label>
+            <p id="tracking-status" class="data-status" role="status" aria-live="polite"></p>
+            <div id="activity-summary" class="activity-summary"></div>
+            <button class="btn-ghost" id="activity-clear" type="button">Borrar actividad</button>
+          </section>
+
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-ghost" id="settings-reset">Restablecer ajustes</button>
+        <button class="btn-solid" id="settings-close">Listo</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="calendar.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
