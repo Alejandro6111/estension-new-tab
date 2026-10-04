@@ -235,6 +235,7 @@ function syncCalendarSettings() {
 function applyCalendarVisibility() {
   document.querySelectorAll('.calendar-card').forEach((card) => { card.hidden = !state.settings.showCalendars; });
   document.querySelector('.widgets-right').hidden = !state.settings.showCalendars && !state.settings.showHabits && !state.settings.showTimeProgress;
+  applyWidgetLayout();
 }
 
 async function setupCalendars() {
@@ -248,6 +249,7 @@ async function setupCalendars() {
   });
   document.getElementById('show-calendars').addEventListener('change', (event) => {
     state.settings.showCalendars = event.target.checked;
+    state.widgetLayout.filter((entry) => ['calendar', 'sports'].includes(entry.id)).forEach((entry) => { entry.hidden = false; });
     applyCalendarVisibility();
     persist();
   });
@@ -283,4 +285,48 @@ async function setupCalendars() {
   document.getElementById('sports-source').addEventListener('click', () => openNewTab(FOOTBALL_TEAMS[activeFootballTeam].page));
   loadGoogleCalendar();
   loadFootballCalendar();
+  setupEventActions();
+}
+
+function openEventEditor(todo) {
+  document.getElementById('event-form').reset();
+  document.getElementById('event-time').disabled = false;
+  document.getElementById('event-duration').disabled = false;
+  document.getElementById('event-name').value = todo?.text || '';
+  document.getElementById('event-date').value = todo?.due || localDayKey();
+  document.getElementById('event-status').textContent = '';
+  openModal('event-modal');
+}
+function buildCalendarTemplate(values) {
+  if (!boundedText(values.title, 200) || !validDayKey(values.date) || !values.allDay && !validTime(values.time)) throw new Error('Revisa el título, la fecha y la hora.');
+  const start = new Date(`${values.date}T${values.allDay ? '12:00' : values.time}:00`);
+  const end = new Date(start);
+  let dates;
+  if (values.allDay) { end.setDate(end.getDate() + 1); dates = `${values.date.replace(/-/g, '')}/${localDayKey(end).replace(/-/g, '')}`; }
+  else {
+    if (![30, 60, 120].includes(values.duration)) throw new Error('La duración no es válida.');
+    end.setMinutes(end.getMinutes() + values.duration);
+    const utc = (date) => date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+    dates = `${utc(start)}/${utc(end)}`;
+  }
+  const url = new URL('https://calendar.google.com/calendar/render');
+  url.searchParams.set('action', 'TEMPLATE'); url.searchParams.set('text', values.title); url.searchParams.set('dates', dates);
+  url.searchParams.set('ctz', Intl.DateTimeFormat().resolvedOptions().timeZone);
+  url.searchParams.set('location', (values.location || '').slice(0, 300)); url.searchParams.set('details', (values.description || '').slice(0, 2000));
+  return url.href;
+}
+function setupEventActions() {
+  document.getElementById('calendar-new-event').addEventListener('click', () => openEventEditor());
+  document.getElementById('event-all-day').addEventListener('change', (event) => {
+    document.getElementById('event-time').disabled = event.target.checked; document.getElementById('event-duration').disabled = event.target.checked;
+  });
+  document.getElementById('event-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    try {
+      const url = buildCalendarTemplate({ title: document.getElementById('event-name').value.trim(), date: document.getElementById('event-date').value,
+        time: document.getElementById('event-time').value, duration: Number(document.getElementById('event-duration').value), allDay: document.getElementById('event-all-day').checked,
+        location: document.getElementById('event-location').value, description: document.getElementById('event-description').value });
+      openNewTab(url); closeModal('event-modal');
+    } catch (error) { document.getElementById('event-status').textContent = error.message; }
+  });
 }

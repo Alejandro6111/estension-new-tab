@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Aurora – Nueva Pestaña",
-  "version": "1.3.0",
-  "description": "Nueva pestaña con accesos, pendientes, calendario, partidos y fondos personalizables.",
+  "version": "1.6.0",
+  "description": "Nueva pestaña con 19 diseños, widgets de posición libre, perfiles, comandos, calendarios y sincronización opcional.",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },

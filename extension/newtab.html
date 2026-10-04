@@ -42,6 +42,7 @@
         <div class="weather-temp" id="weather-temp">—°</div>
       </div>
       <button class="weather-retry" id="weather-retry" hidden>Reintentar</button>
+      <button type="button" class="calendar-action" id="weather-details-open">Ver pronóstico</button>
     </div>
 
     <div class="card quote-card">
@@ -57,6 +58,8 @@
         <button class="todo-add" type="submit" aria-label="Añadir tarea">+</button>
       </form>
       <button class="todo-clear" id="todo-clear" type="button" hidden>Limpiar completadas</button>
+      <p id="todo-due-summary" class="widget-hint" role="status"></p>
+      <button type="button" class="calendar-action" id="todo-advanced">Nueva tarea con fecha</button>
     </div>
 
     <section class="card focus-card extra-widget" aria-labelledby="focus-title">
@@ -83,9 +86,11 @@
 
   <!-- Columna derecha: calendarios independientes -->
   <aside class="widgets widgets-right" aria-label="Calendarios y hábitos">
-    <section class="card calendar-card" aria-labelledby="google-calendar-title">
+    <section class="card calendar-card google-calendar-card" aria-labelledby="google-calendar-title">
       <div class="calendar-heading"><h2 id="google-calendar-title">Mi calendario</h2><button type="button" class="calendar-action" id="google-calendar-settings">Conectar</button></div>
       <div id="google-calendar-content" class="calendar-content" aria-live="polite"></div>
+      <button type="button" class="calendar-action" id="calendar-new-event">+ Nuevo evento</button>
+      <div id="calendar-todos"></div>
     </section>
 
     <section class="card calendar-card sports-card" aria-labelledby="sports-calendar-title">
@@ -118,18 +123,36 @@
       <progress id="year-progress" max="100" value="0"></progress>
       <p class="widget-hint" id="time-remaining"></p>
     </section>
+    <section class="card statistics-card extra-widget" aria-labelledby="statistics-title">
+      <div class="widget-heading"><h2 id="statistics-title">Esta semana</h2></div>
+      <div id="focus-statistics"></div><div id="habit-statistics"></div>
+      <p class="widget-hint">Hasta 366 días registrados por historial.</p>
+    </section>
   </aside>
+  <aside class="widgets widgets-center" aria-label="Widgets centrales"></aside>
   </div>
 
+  <div class="page-toolbar" aria-label="Personalizar página">
+    <div id="profile-tabs" class="profile-tabs" aria-label="Perfiles"></div>
+    <div class="page-actions"><button type="button" id="profiles-open">Perfiles</button><button type="button" id="sessions-open">Pestañas</button><button type="button" id="edit-page">Editar página</button></div>
+  </div>
+  <div id="layout-editor" class="layout-editor" hidden>
+    <div class="editor-heading"><strong>Organiza tu página</strong><button type="button" id="edit-page-done">Listo</button></div>
+    <p>En modo Por zonas, arrastra «Mover» entre izquierda, centro y derecha. En Posición libre, arrástralo a cualquier lugar o usa las flechas del teclado (10 px; Mayús: 1 px). Ajusta ancho y alto en cada widget; 0 significa automático.</p>
+    <button type="button" id="layout-editor-settings" class="btn-ghost">Diseños y dimensiones en Ajustes</button>
+    <div id="hidden-widgets"></div><button type="button" id="layout-reset" class="btn-ghost">Restablecer disposición</button>
+  </div>
   <!-- Centro: búsqueda + categorías + accesos -->
   <main class="main-area">
     <form class="search-bar" id="search-form">
       <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.47 6.47 0 0 0 1.48-5.34C15.44 5.01 12.55 2.5 9.14 2.5 5.6 2.5 2.75 5.35 2.75 8.9s2.85 6.4 6.39 6.4c1.49 0 2.86-.53 3.93-1.4l.27.28v.79l4.99 4.98 1.49-1.49-4.98-4.98ZM9.14 13.3c-2.43 0-4.4-1.97-4.4-4.4s1.97-4.4 4.4-4.4 4.4 1.97 4.4 4.4-1.97 4.4-4.4 4.4Z"/></svg>
-      <input type="text" id="search-input" placeholder="Buscar en Google o escribe una URL" autocomplete="off">
+      <input type="text" id="search-input" placeholder="Busca o escribe / para ver comandos" autocomplete="off" aria-label="Buscar o ejecutar un comando" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="command-results">
       <button type="button" class="icon-btn" id="settings-btn" title="Ajustes" aria-label="Abrir ajustes">
         <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19.14 12.94a7.14 7.14 0 0 0 .06-.94 7.14 7.14 0 0 0-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.3 7.3 0 0 0-1.63-.94L14.4 2.4a.5.5 0 0 0-.5-.4h-3.84a.5.5 0 0 0-.5.4l-.36 2.86a7.3 7.3 0 0 0-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64L4.8 11.06c-.04.31-.06.62-.06.94s.02.63.06.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.3.6.22l2.39-.96c.5.4 1.04.71 1.63.94l.36 2.86c.03.24.25.42.5.42h3.84c.25 0 .47-.18.5-.42l.36-2.86c.59-.23 1.13-.55 1.63-.94l2.39.96c.22.08.48 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"/></svg>
       </button>
     </form>
+    <div id="command-panel" class="command-panel" hidden><div id="command-results" role="listbox" aria-label="Comandos y accesos"></div><p class="command-hint">↑ ↓ elegir · Enter ejecutar · Esc cerrar</p></div>
+    <p id="command-status" class="command-status" role="status" aria-live="polite"></p>
 
     <nav class="category-tabs" id="category-tabs" aria-label="Categorías de accesos"></nav>
 
@@ -253,6 +276,8 @@
           <button class="settings-nav-btn" data-section="calendario">Calendarios</button>
           <button class="settings-nav-btn" data-section="busqueda">Búsqueda</button>
           <button class="settings-nav-btn" data-section="datos">Tus datos</button>
+          <button class="settings-nav-btn" data-section="perfiles">Perfiles</button>
+          <button class="settings-nav-btn" data-section="sesiones">Pestañas</button>
         </nav>
 
         <div class="settings-content">
@@ -356,6 +381,25 @@
 
           <section class="settings-section" id="section-vista" hidden>
             <h3>Vista</h3><p class="settings-intro">Ajusta cómo se muestran los accesos y los widgets.</p>
+            <button type="button" class="btn-ghost" id="settings-edit-page">Editar posición y tamaño de widgets</button>
+            <div class="settings-divider"></div>
+            <h4>Diseños de widgets</h4>
+            <p class="settings-hint">19 diseños listos para aplicar, incluida la referencia de tu captura. Cambian posiciones y dimensiones; conservan tus datos y los widgets que hayas ocultado.</p>
+            <div id="widget-designs" class="widget-design-grid" role="group" aria-label="Diseños de widgets"></div>
+            <p id="widget-design-status" class="data-status" role="status"></p>
+            <label>Cómo mover los widgets
+              <select id="widget-placement"><option value="columns">Por zonas: izquierda, centro y derecha</option><option value="free">Posición libre: arrastrar a cualquier lugar</option></select>
+            </label>
+            <p class="settings-hint">Activa «Editar posición y tamaño» para arrastrar. En pantallas de 900 px o menos, la posición libre se adapta a zonas para que todos los controles sigan accesibles.</p>
+            <div id="widget-zone-settings" class="widget-zone-settings"></div>
+            <div class="widget-area-fields">
+              <label>Ancho de la zona de accesos (px)<input type="number" id="shortcuts-width" min="320" max="1600" step="10"></label>
+              <label>Separación entre widgets (px)<input type="number" id="widget-gap" min="4" max="48" step="1"></label>
+            </div>
+            <p class="settings-hint">Ancho central 0: todo el espacio disponible. Altura 0: altura de pantalla en laterales y automática abajo. Las alturas fijas permiten desplazamiento dentro de cada zona.</p>
+            <button type="button" id="widget-design-reset" class="btn-ghost">Volver a la distribución original</button>
+            <div class="settings-divider"></div>
+            <label class="switch-row"><span>Estadísticas de enfoque y hábitos</span><input type="checkbox" id="show-statistics"></label>
             <p class="settings-hint">Presentación de los accesos</p>
             <div class="btn-group view-option-group" id="shortcut-view-group" role="group" aria-label="Presentación de los accesos">
               <button type="button" data-view="cuadricula">Cuadrícula</button>
@@ -468,8 +512,45 @@
             <p class="settings-hint">Registra el tiempo de la pestaña activa cuando el navegador está enfocado y el equipo no está inactivo. Solo se guarda en este navegador.</p>
             <label class="switch-row"><span>Registrar actividad</span><input type="checkbox" id="track-pages"></label>
             <p id="tracking-status" class="data-status" role="status" aria-live="polite"></p>
+            <label class="switch-row"><span>Guardar solo el dominio, sin URL ni título</span><input type="checkbox" id="privacy-domain-only"></label>
+            <label class="switch-row"><span>Excluir sitios de banca conocidos</span><input type="checkbox" id="privacy-banking"></label>
+            <p class="settings-hint">La lista incluye Bancolombia, Davivienda, Banco de Bogotá, BBVA, Nequi y otros. Añade los dominios que falten; también se excluyen sus subdominios.</p>
+            <label for="privacy-domains">Dominios excluidos, uno por línea</label><textarea id="privacy-domains" rows="3" placeholder="mi-banco.com"></textarea>
+            <label for="privacy-urls">Páginas excluidas, una URL por línea</label><textarea id="privacy-urls" rows="3" placeholder="https://ejemplo.com/privado"></textarea>
+            <button type="button" class="btn-ghost" id="privacy-save">Guardar privacidad</button><p id="privacy-status" class="data-status" role="status"></p>
+            <div class="btn-group activity-periods" id="activity-periods" aria-label="Periodo de actividad"><button type="button" data-days="1" aria-pressed="true">Hoy</button><button type="button" data-days="7" aria-pressed="false">7 días</button><button type="button" data-days="30" aria-pressed="false">30 días</button></div>
             <div id="activity-summary" class="activity-summary"></div>
             <button class="btn-ghost" id="activity-clear" type="button">Borrar actividad</button>
+            <div class="settings-divider"></div><h3>Sincronizar entre equipos</h3>
+            <p class="settings-hint">Usa la misma cuenta del navegador y el mismo ID de extensión. Incluye perfiles, accesos, tareas, notas, hábitos y ajustes. Excluye actividad, sesiones de pestañas, privacidad, dirección iCal y archivos de fondo locales. Límite: 80 KB.</p>
+            <label class="switch-row"><span>Activar sincronización</span><input type="checkbox" id="sync-enabled"></label>
+            <div class="data-actions"><button type="button" class="btn-ghost" id="sync-upload">Enviar este equipo</button><button type="button" class="btn-ghost" id="sync-download">Traer la copia sincronizada</button><button type="button" class="btn-ghost" id="sync-previous-export">Exportar copia anterior a sincronizar</button></div><p id="sync-status" class="data-status" role="status"></p>
+          </section>
+
+          <section class="settings-section" id="section-perfiles" hidden>
+            <h3>Tus perfiles</h3><p class="settings-intro">Un espacio para cada parte de tu día. Cada perfil guarda sus accesos, fondo, tema, widgets, tareas, notas y hábitos.</p>
+            <div id="profiles-list"></div>
+            <form id="profile-form" class="stack-form">
+              <label>Nombre del nuevo perfil<input id="profile-name" type="text" maxlength="40" required placeholder="Universidad"></label>
+              <label>Empezar con<select id="profile-template"><option value="copy">Una copia del perfil actual</option><option value="university">Universidad</option><option value="work">Trabajo</option><option value="gaming">Gaming / Ocio</option><option value="empty">Un espacio vacío</option></select></label>
+              <button type="submit" class="btn-solid">Crear perfil</button>
+            </form><p id="profile-status" class="data-status" role="status"></p>
+            <div class="settings-divider"></div><h3>Cambiar por horario</h3>
+            <p class="settings-hint">Se aplica al abrir Aurora y cada minuto mientras está abierta. Un cambio manual tiene prioridad hasta el final del día. Fuera de los horarios se conserva el último perfil. Si coinciden, gana el primero.</p>
+            <div id="profile-rules"></div>
+            <form id="profile-rule-form" class="stack-form">
+              <label>Perfil<select id="rule-profile"></select></label>
+              <fieldset class="rule-days"><legend>Días</legend><label><input type="checkbox" value="1" checked>L</label><label><input type="checkbox" value="2" checked>M</label><label><input type="checkbox" value="3" checked>X</label><label><input type="checkbox" value="4" checked>J</label><label><input type="checkbox" value="5" checked>V</label><label><input type="checkbox" value="6">S</label><label><input type="checkbox" value="0">D</label></fieldset>
+              <div class="form-columns"><label>Desde<input id="rule-start" type="time" value="07:00" required></label><label>Hasta<input id="rule-end" type="time" value="18:00" required></label></div><button class="btn-ghost" type="submit">Añadir horario</button>
+            </form><button type="button" id="profiles-auto-resume" class="calendar-action">Reanudar horarios ahora</button>
+          </section>
+          <section class="settings-section" id="section-sesiones" hidden>
+            <h3>Pestañas y sesiones</h3><p class="settings-intro">Recupera tus páginas recientes o guarda una ventana para abrirla después.</p>
+            <button type="button" class="btn-ghost" id="tabs-connect">Permitir acceso a pestañas</button><button type="button" class="calendar-action" id="tabs-refresh">Actualizar pestañas</button>
+            <div id="recent-tabs"></div>
+            <form id="session-form" class="stack-form"><label>Nombre de la sesión<input type="text" id="session-name" maxlength="60" required placeholder="Investigación SQL"></label><button type="submit" class="btn-solid">Guardar esta ventana</button></form>
+            <p class="settings-hint">Solo guarda páginas HTTP/HTTPS de la ventana actual; excluye privadas e internas. Máximo 20 sesiones de 100 pestañas.</p><p id="session-status" class="data-status" role="status"></p>
+            <div id="sessions-list"></div><button type="button" id="tabs-disconnect" class="calendar-action">Retirar acceso a pestañas</button>
           </section>
 
         </div>
@@ -482,7 +563,49 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="task-modal" hidden><div class="modal feature-modal" role="dialog" aria-modal="true" aria-labelledby="task-title">
+    <h2 id="task-title">Nueva tarea</h2><form id="task-detail-form" class="stack-form">
+      <label>Tarea<input type="text" id="task-text" maxlength="120" required></label>
+      <div class="form-columns"><label>Fecha<input type="date" id="task-due"></label><label>Prioridad<select id="task-priority"><option value="normal">Normal</option><option value="high">Alta</option><option value="low">Baja</option></select></label></div>
+      <label>Categoría<select id="task-category"></select></label><label>Repetir<select id="task-repeat"><option value="none">No repetir</option><option value="daily">Cada día</option><option value="weekly">Cada semana en este día</option><option value="monthly">Cada mes en esta fecha</option></select></label>
+      <p class="settings-hint">Al completar una tarea repetida se crea la siguiente fecha. En meses cortos se usa el último día del mes.</p><p id="task-status" class="data-status" role="status"></p>
+      <div class="modal-actions"><button type="button" class="btn-ghost" data-close-modal="task-modal">Cancelar</button><button type="submit" class="btn-solid">Guardar tarea</button></div>
+    </form>
+  </div></div>
+  <div class="modal-overlay" id="event-modal" hidden><div class="modal feature-modal" role="dialog" aria-modal="true" aria-labelledby="event-title">
+    <h2 id="event-title">Nuevo evento</h2><form id="event-form" class="stack-form">
+      <label>Título<input id="event-name" type="text" maxlength="200" required></label>
+      <div class="form-columns"><label>Fecha<input id="event-date" type="date" required></label><label>Hora<input id="event-time" type="time" value="14:00" required></label></div>
+      <label>Duración<select id="event-duration"><option value="30">30 minutos</option><option value="60" selected>1 hora</option><option value="120">2 horas</option></select></label><label class="switch-row"><span>Todo el día</span><input id="event-all-day" type="checkbox"></label>
+      <label>Lugar<input id="event-location" type="text" maxlength="300"></label><label>Descripción<textarea id="event-description" maxlength="2000" rows="3"></textarea></label>
+      <p class="settings-hint">Google Calendar abrirá el formulario con estos datos. Allí podrás revisar y guardar el evento.</p><p id="event-status" class="data-status" role="status"></p>
+      <div class="modal-actions"><button type="button" class="btn-ghost" data-close-modal="event-modal">Cancelar</button><button type="submit" class="btn-solid">Abrir en Google Calendar</button></div>
+    </form>
+  </div></div>
+  <div class="modal-overlay" id="weather-modal" hidden><div class="modal feature-modal" role="dialog" aria-modal="true" aria-labelledby="weather-title">
+    <div class="editor-heading"><h2 id="weather-title">Pronóstico del tiempo</h2><button type="button" class="icon-btn" data-close-modal="weather-modal" aria-label="Cerrar pronóstico">✕</button></div>
+    <div id="weather-forecast"></div><button type="button" id="weather-refresh" class="btn-ghost">Actualizar clima</button>
+  </div></div>
+  <div id="aurora-announcement" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="storage.js"></script>
+  <script src="widget-designs.js"></script>
+  <script src="models.js"></script>
+  <script src="profiles.js"></script>
+  <script src="widgets.js"></script>
+  <script src="dashboard.js"></script>
+  <script src="weather.js"></script>
+  <script src="tasks.js"></script>
+  <script src="shortcuts.js"></script>
+  <script src="backgrounds.js"></script>
   <script src="calendar.js"></script>
+  <script src="privacy.js"></script>
+  <script src="activity-view.js"></script>
+  <script src="settings.js"></script>
+  <script src="dialogs.js"></script>
+  <script src="commands.js"></script>
+  <script src="sync.js"></script>
+  <script src="sessions.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

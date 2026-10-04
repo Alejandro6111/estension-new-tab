@@ -6,4 +6,14 @@ Aurora ofrece accesos por categorías, buscador, reloj, clima, frase diaria, pen
 
 Al abrir una pestaña, Aurora muestra una vista previa ligera del fondo guardado mientras carga la imagen o el video completo, sin pintar valores provisionales.
 
-La guía completa de uso, datos y estructura está en el `README.md` de la carpeta superior.
+Aurora **1.6** vuelve a contener los accesos en un bloque central de 700 px. En **Ajustes → Vista** hay 19 diseños, incluido **Original** (seis widgets a la izquierda y cinco a la derecha), y controles de ancho, alto y columnas independientes para laterales y centro inferior. También puedes cambiar el ancho de los accesos y la separación de los widgets. Los diseños conservan tus datos y la visibilidad que hayas elegido.
+
+Para mover cada widget a cualquier posición, elige **Posición libre**, activa **Editar posición y tamaño** y arrastra **Mover**. Las flechas del teclado desplazan 10 px (`Mayús`: 1 px). En cada widget puedes introducir ancho, alto y coordenadas X/Y; ancho/alto 0 es automático. **Por zonas** conserva el arrastre entre izquierda, centro y derecha y el orden con teclado. Las alturas fijas permiten desplazamiento interno; altura de zona 0 usa la pantalla en laterales y altura natural en el centro. **Listo** o `Esc` termina la edición. Todo se guarda por perfil, se exporta y se puede sincronizar. En pantallas de 900 px o menos, la posición libre se adapta a zonas sin alterar las coordenadas guardadas. **Volver a la distribución original** restaura las posiciones y dimensiones iniciales.
+
+Aurora **1.5** añade paleta de comandos (`/` o `Ctrl+K`), widgets que puedes arrastrar/ordenar/redimensionar/ocultar, perfiles con horarios, estadísticas de enfoque y rachas de hábitos, tareas con fecha/prioridad/repetición, creación de eventos mediante el formulario de Google Calendar, pronóstico ampliado, actividad de hoy/7/30 días con exclusiones de privacidad, sincronización voluntaria entre equipos y sesiones de pestañas. Los datos anteriores pasan al perfil Personal y las copias antiguas siguen siendo compatibles.
+
+Ejemplos del buscador: `yt re zero opening`, `gh openai`, `@uni github`, `todo entregar SQL`, `note revisar ejercicio 4`, `focus 50`, `weather`, `calc 3500 * 22`, `> ajustes`, `> fondos`, `> actividad`, `> cambiar perfil`.
+
+La sincronización se activa en Tus datos y requiere la misma cuenta e ID de extensión. Tiene un límite de 80 KB y excluye actividad, privacidad, sesiones de pestañas, dirección iCal y archivos de fondo locales. Exportar/importar JSON permite transferir el respaldo completo. Pestañas solicita `tabs` por separado; actividad requiere `tabs` e `idle`, ambos opcionales. No se añaden permisos obligatorios, servicios ni dependencias de ejecución. Recarga la extensión tras actualizar.
+
+El JavaScript se divide en módulos clásicos locales; `script.js` coordina el inicio. La guía completa de uso, datos, limitaciones, estructura y pruebas está en el `README.md` de la carpeta superior.
